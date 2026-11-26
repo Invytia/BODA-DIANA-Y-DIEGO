@@ -157,6 +157,7 @@ h2{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,7vw,2.9rem);lin
 .fg{margin-bottom:22px}
 .fg label{display:block;font-family:var(--sans);font-size:.68rem;letter-spacing:.24em;color:var(--wine);margin-bottom:4px;text-transform:uppercase;font-weight:500}
 .fg input[type=text],.fg input[type=number],.fg select,.fg textarea{width:100%;padding:9px 2px;background:transparent;border:0;border-bottom:1px solid var(--beige-d);color:var(--ink);font-family:var(--serif);font-size:1.15rem;border-radius:0}
+.fg input[readonly]{color:var(--wine);font-weight:600}
 .fg ::placeholder{color:#a79291;font-style:italic}
 #paseBox{display:none;text-align:center;padding-bottom:20px;margin-bottom:24px;border-bottom:1px dashed var(--beige-d)}
 #paseBox .who{font-weight:500;font-size:1.9rem;color:var(--wine)}#paseBox .pz{color:var(--wine);font-size:1.5rem;font-weight:700}
@@ -383,8 +384,78 @@ const EVENT_DATE = new Date(2026, 11, 19, 17, 0, 0);
 const $ = id => document.getElementById(id);
 const q = new URLSearchParams(location.search);
 
-/* Nombre del invitado en el sobre (solo si viene en la URL) */
-(function(){ const g = q.get('invitado'); if(g){ const n=$('envGuest'); n.textContent=g; n.style.display='block'; } })();
+/* ===== PASES NOMINALES · Invytia =====
+   Uso: https://invytia.github.io/BODA-DIANA-Y-DIEGO/?id=n
+   Formato: "id": ["Nombre de invitados", pases] */
+const GUESTS = {
+  "1": ["Araceli Martínez Torres", 5],
+  "2": ["Marcos Martínez torres", 2],
+  "3": ["Pedro López y familia", 6],
+  "4": ["Alex Domínguez González y familia", 4],
+  "5": ["Viviana Domínguez Gonzalez", 3],
+  "6": ["Edwin Martín Gómez y familia", 6],
+  "7": ["Elsa Ramírez Martinez", 2],
+  "8": ["Jocelyn Alvarado Ramírez", 3],
+  "9": ["Alejandra Ramírez", 3],
+  "10": ["Martín Ramírez Martínez", 6],
+  "11": ["Bacilio y familia", 2],
+  "12": ["Yolanda Vázquez", 2],
+  "13": ["Juan Manuel Martínez Salazar", 2],
+  "14": ["Macario Martínez Salazar", 4],
+  "15": ["David Martínez Salazar", 2],
+  "16": ["Kevin Valencia Castillo", 2],
+  "17": ["Axel Hernández", 2],
+  "18": ["Rubi Villalobos Amaro", 2],
+  "19": ["Ana Madrigal Luis", 2],
+  "20": ["Esmeralda Madrigal", 2],
+  "21": ["Jania Carreón Ramírez", 3],
+  "22": ["Valeria Rivas Ayala", 2],
+  "23": ["Jorge Alberto Feria Guin", 3],
+  "24": ["Karyme Soto", 3],
+  "25": ["Danna Rique Sánchez", 2],
+  "26": ["Angie Silva Aquino", 2],
+  "27": ["Litzuli Basurto Hernández", 2],
+  "28": ["Víctor González Ostos", 1],
+  "29": ["Diego Aldair Marín Ordóñez", 2],
+  "30": ["Alonso Santiago", 2],
+  "31": ["Antonio Vázquez López", 4],
+  "32": ["Elizabeth Vázquez Villalobos", 2],
+  "33": ["Angel Rasgado Ramos y familia", 3],
+  "34": ["Mercedes Ramos López y Familia", 4],
+  "35": ["Cecilio Ramos López", 3],
+  "36": ["José Luis Rangel Aguilar", 2],
+  "37": ["Abril Ramos Mateo", 2],
+  "38": ["Herodias López y Vidal Ramos", 3],
+  "39": ["Jesús Ramos Lopez", 1],
+  "40": ["Román Ramos López", 5],
+  "41": ["María de Lourdes Rasgado Antonio", 1],
+  "42": ["Yavel Vázquez Villalobos", 5],
+  "43": ["Armando Olmedo Bernal", 4],
+  "44": ["Ricardo Olmedo Bernal y familia", 4],
+  "45": ["Julián Enrique Olmedo Rojas", 3],
+  "46": ["Ricardo Olmedo Rojas", 3],
+  "47": ["Carmen Olmedo Bernal y familia", 7],
+  "48": ["Amelia Olmedo Bernal y familia", 4],
+  "49": ["Alejandro Alvarado Olmedo", 3],
+  "50": ["Carlos Julián Olmedo Bernal y familia", 3],
+  "51": ["Gabriel Vera García y Familia", 4],
+  "52": ["Julio César Bernal y Familia", 3],
+  "53": ["José Manuel Doroteo Secundino", 5],
+  "54": ["Sergio", 1],
+  "55": ["Yari Lisbeth Rasgado Ramos", 4],
+  "56": ["Santiago Ramos López", 6],
+  "57": ["Niceida Rasgado Antonio", 2],
+  "58": ["Omar Chávez", 2],
+  "59": ["Juan Juárez Sarabia", 3],
+  "60": ["Marbella López Soto", 2],
+  "61": ["Vladimir Fuentes Domínguez", 4],
+  "62": ["Angelita Valdiviezo Alvarado", 1]
+};
+const gid = (q.get('id') || '').trim();
+const G = Object.prototype.hasOwnProperty.call(GUESTS, gid) ? GUESTS[gid] : null;
+
+/* Nombre del invitado en el sobre (por ?id= o, como respaldo, ?invitado=) */
+(function(){ const g = G ? G[0] : q.get('invitado'); if(g){ const n=$('envGuest'); n.textContent=g; n.style.display='block'; } })();
 
 /* Efectos: destellos y confeti dorado */
 const cv=$('fx'), cx=cv.getContext('2d'), reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -460,13 +531,20 @@ document.querySelectorAll('.rv').forEach(el => { if(!el.closest('#hero')) io.obs
   upd();
 })();
 
-/* Pase personalizado: ?invitado=Familia%20Perez&pases=3&nombres=Ana,Luis,Eva */
+/* Pase personalizado: ?id=n (nominal). Respaldo: ?invitado=Familia%20Perez&pases=3&nombres=Ana,Luis,Eva */
 (function(){
-  const inv = q.get('invitado'), pases = q.get('pases') || q.get('p'), nombres = q.get('nombres');
+  const inv = G ? G[0] : q.get('invitado');
+  const pases = G ? G[1] : (q.get('pases') || q.get('p'));
+  const nombres = G ? null : q.get('nombres');
   if(pases){
     $('paseBox').style.display='block';
     $('guestName').textContent = inv || 'Pase especial';
     $('guestPases').textContent = pases;
+  }
+  if(G){
+    const nom = $('rsvpNombre'); nom.value = G[0]; nom.readOnly = true;
+    const num = $('rsvpNum'); num.max = G[1]; num.value = G[1];
+    if(G[1]===1){ num.readOnly = true; }
   }
   if(nombres){
     const arr = nombres.split(',').map(s=>s.trim()).filter(Boolean);
@@ -494,16 +572,24 @@ function sendRSVP(){
     if(ok.length) msg += `✅ *Asistirán con gusto:*\n- ${ok.join('\n- ')}\n\n`;
     if(no.length) msg += `❌ *No podrán asistir:*\n- ${no.join('\n- ')}\n\n`;
   }else{
-    const n = $('rsvpNombre').value.trim(), a = $('rsvpAsist').value, p = $('rsvpNum').value;
+    const n = $('rsvpNombre').value.trim(), a = $('rsvpAsist').value; let p = parseInt($('rsvpNum').value,10);
     if(!n || !a){ alert('Por favor, completa tu nombre y tu respuesta.'); return; }
-    msg = `Hola, soy *${n}*.\n\nQuiero confirmar mi respuesta a la boda de Diana y Diego: *${a}*\nPersonas: *${p}*\n`;
+    if(G){
+      const noVa = a.startsWith('Lamentablemente');
+      if(noVa) p = 0;
+      else if(!p || p<1 || p>G[1]){ alert('Tu pase incluye hasta '+G[1]+(G[1]===1?' lugar.':' lugares. Indica un número entre 1 y '+G[1]+'.')); return; }
+      msg = `Hola, soy *${n}* (Pase #${gid}).\n\nQuiero confirmar mi respuesta a la boda de Diana y Diego: *${a}*\nPersonas: *${p}* de *${G[1]}* lugares reservados\n`;
+    }else{
+      msg = `Hola, soy *${n}*.\n\nQuiero confirmar mi respuesta a la boda de Diana y Diego: *${a}*\nPersonas: *${p}*\n`;
+    }
   }
   open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 function sendWishes(){
   const w = $('wishes').value.trim();
   if(!w){ alert('Por favor, escribe un mensaje primero.'); return; }
-  open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent('¡Hola Diana y Diego! Les dejo este mensaje:\n\n"'+w+'"')}`,'_blank');
+  const de = G ? `Soy *${G[0]}* (Pase #${gid}).\n\n` : '';
+  open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent('¡Hola Diana y Diego! '+de+'Les dejo este mensaje:\n\n"'+w+'"')}`,'_blank');
 }
 
 /* Agregar al calendario (.ics) · 17:00 a 01:00 hora de México (UTC-6) */
